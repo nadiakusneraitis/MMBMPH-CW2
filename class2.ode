@@ -1,0 +1,31 @@
+# Class 2 Model from Prescott, De Koninck, and Sejnowski (2008)
+
+# 1. PARAMETERS
+# CRITICAL: betaw is set to -13 for Class 2 excitability
+param Istim=0, C=2
+param gfast=20, ENa=50, betam=-1.2, gammam=18
+param gslow=20, EK=-100, betaw=-13, gammaw=10, phiw=0.15
+param gleak=2, Eleak=-70
+
+# 2. FUNCTIONS
+minf(V) = 0.5*(1 + tanh((V - betam)/gammam))
+winf(V) = 0.5*(1 + tanh((V - betaw)/gammaw))
+tauw(V) = 1/cosh((V - betaw)/(2*gammaw))
+
+# 3. CURRENTS
+Ifast(V) = gfast * minf(V) * (V - ENa)
+Islow(V,w) = gslow * w * (V - EK)
+Ileak(V) = gleak * (V - Eleak)
+
+# 4. DIFFERENTIAL EQUATIONS
+V' = (Istim - Ifast(V) - Islow(V,w) - Ileak(V)) / C
+w' = phiw * (winf(V) - w) / tauw(V)
+
+# 5. INITIAL CONDITIONS
+init V=-60, w=0.01
+
+# 6. XPP SETTINGS
+@ maxstor=1000000, total=200, dt=0.05, meth=rungekutta
+@ xp=t, yp=V, xlo=0, xhi=200, ylo=-80, yhi=40
+
+done
